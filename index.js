@@ -74,6 +74,16 @@ app.post('/subscribe', async (req, res) => {
     }
 });
 
+app.delete('/subscribers', async (req, res) => {
+    try {
+        await Subscriber.deleteMany({});
+        res.status(200).json('All subscribers deleted successfully');
+    } catch (error) {
+        res.status(500).json('Failed to delete subscribers');
+        console.error(error, 'Failed to delete subscribers');
+    }
+});
+
 
 const PORT = process.env.PORT || 3000;
 
