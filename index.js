@@ -84,6 +84,20 @@ app.delete('/subscribers', async (req, res) => {
     }
 });
 
+app.delete('/subscribers/:id', async (req, res) => {
+    const userId = req.params.id;
+    try {
+        const deletedUser = await Subscriber.findByIdAndDelete(userId);
+        if (!deletedUser) {
+            return res.status(404).json('User not found');
+        }
+        res.status(200).json('User deleted successfully');
+    } catch (error) {
+        res.status(500).json('Failed to delete user');
+        console.error(error, 'Failed to delete user');
+    }
+});
+
 
 const PORT = process.env.PORT || 3000;
 
