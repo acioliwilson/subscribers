@@ -3,6 +3,8 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const json2csv = require('json2csv').parse;
+const fs = require('fs');
 
 const app = express();
 app.use(express.json());
@@ -95,6 +97,25 @@ app.delete('/subscribers/:id', async (req, res) => {
     } catch (error) {
         res.status(500).json('Failed to delete user');
         console.error(error, 'Failed to delete user');
+    }
+});
+
+app.get('/export-subscribers', async (req, res) => {
+    try {
+        const subscribers = await Subscriber.find({});
+
+        const fields = ['name', 'email'];
+        const csv = json2csv(subscribers, { fields });
+
+        const filename = 'subscribers.csv';
+
+        res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+        res.set('Content-Type', 'text/csv');
+        
+        res.status(200).send(csv);
+    } catch (error) {
+        res.status(500).json('Failed to export subscribers');
+        console.error(error, 'Failed to export subscribers');
     }
 });
 
