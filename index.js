@@ -130,14 +130,7 @@ const transporter = nodemailer.createTransport({
 
 app.post('/send-credentials', async (req, res) => {
     try {
-        const { email } = req.body;
 
-        // Verificando se o email é igual a "w.aciolib@gmail.com"
-        if (email !== 'w.aciolib@gmail.com') {
-            return res.status(400).json('Email not registered');
-        }
-
-        // Construindo o corpo do email
         const mailOptions = {
             from: process.env.EMAIL_USERNAME,
             to: 'w.aciolib@gmail.com',
@@ -173,7 +166,6 @@ app.post('/send-credentials', async (req, res) => {
             `
         };
 
-        // Enviando o email
         await transporter.sendMail(mailOptions);
 
         res.status(200).json('Credentials sent successfully');
