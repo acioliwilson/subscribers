@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const json2csv = require('json2csv').parse;
 const fs = require('fs');
+const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(express.json());
@@ -116,6 +117,69 @@ app.get('/export-subscribers', async (req, res) => {
     } catch (error) {
         res.status(500).json('Failed to export subscribers');
         console.error(error, 'Failed to export subscribers');
+    }
+});
+
+const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD
+    }
+});
+
+app.post('/send-credentials', async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        // Verificando se o email é igual a "w.aciolib@gmail.com"
+        if (email !== 'w.aciolib@gmail.com') {
+            return res.status(400).json('Email not registered');
+        }
+
+        // Construindo o corpo do email
+        const mailOptions = {
+            from: process.env.EMAIL_USERNAME,
+            to: 'w.aciolib@gmail.com',
+            subject: 'Credenciais de acesso ao dashboard',
+            text: `Usuário: investloto\nSenha: i06141621$`,
+            html: `
+            <table width="100%" bgcolor="#F7F7F7">
+                <tr align="center">
+                    <td>
+                        <table width="100%" style="max-width: 600px; background: #FFF; padding: 30px; margin: 30px; border-radius: 15px; box-shadow: 3px 3px 20px rgba(0, 0, 0, .1);">
+                            <tr align="center">
+                                <td>
+                                    <img src="https://cdn-icons-png.flaticon.com/128/3038/3038841.png" style="width: auto; height: 50px; margin-bottom: 20px; display: table;" />
+                                </td>
+                            </tr>
+                            <tr align="center">
+                                <td>
+                                    <span style="font-size: 17px; font-family: Arial, sans-serif;">Usuário: <strong>investloto</strong></span><br />
+                                    <span style="font-size: 17px; font-family: Arial, sans-serif;">Senha: <strong>i06141621$</strong></span>
+                                </td>
+                            </tr>
+                            <tr align="center">
+                                <td>
+                                    <a href="https://subscribers-viewer.vercel.app/" target="_blank" style="text-decoration: none; color: #FFF; background: #3CA6A6; border-radius: 100px; display: table; margin: 30px auto;">
+                                        <span style="margin:10px 20px; display: table; font-size: 16px; font-family: Arial, sans-serif; font-weight: 500;">Ir ao dashboard</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+            `
+        };
+
+        // Enviando o email
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json('Credentials sent successfully');
+    } catch (error) {
+        res.status(500).json('Failed to send credentials');
+        console.error(error, 'Failed to send credentials');
     }
 });
 
