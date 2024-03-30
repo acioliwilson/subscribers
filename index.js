@@ -128,6 +128,69 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+const statusSchema = new mongoose.Schema({
+    signup: {
+        type: Boolean,
+        required: true
+    }
+});
+
+const Status = mongoose.model('Status', statusSchema);
+
+app.get('/status', async (req, res) => {
+    try {
+        const status = await Status.find({});
+        res.status(200).json(status);
+    } catch (error) {
+        res.status(500).json('Failed to fetch subscribers');
+        console.error(error, 'Failed to fetch subscribers');
+    }
+});
+
+app.get('/status/:id', async (req, res) => {
+    try {
+        const { id } = req.params; // Obtém o ID do parâmetro da URL
+        const status = await Status.findById(id);
+
+        // Se o status não for encontrado, retorne um erro 404
+        if (!status) {
+            return res.status(404).json({ message: 'Status não encontrado' });
+        }
+
+        // Se encontrado, retorne o status
+        res.status(200).json(status);
+    } catch (error) {
+        res.status(500).json({ message: 'Falha ao buscar o status' });
+        console.error(error, 'Falha ao buscar o status');
+    }
+});
+
+app.put('/status/:id', async (req, res) => {
+    try {
+        const { id } = req.params; // Obtém o ID do parâmetro da URL
+
+        // Consulta o documento pelo ID
+        const status = await Status.findById(id);
+
+        // Se o documento não for encontrado, retorne um erro 404
+        if (!status) {
+            return res.status(404).json({ message: 'Status não encontrado' });
+        }
+
+        // Altera o valor do campo 'signup' de true para false ou de false para true
+        status.signup = !status.signup;
+
+        // Salva as alterações no banco de dados
+        await status.save();
+
+        // Responde com o status atualizado
+        res.status(200).json(status);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Erro ao processar a solicitação' });
+    }
+});
+
 app.post('/send-credentials', async (req, res) => {
     try {
 
